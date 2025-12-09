@@ -2,7 +2,7 @@ package usecase
 
 import (
 	domain "user-service/internal/domen"
-	"user-service/pkg/cache"
+	"user-service/internal/pkg/cache"
 )
 
 type UserUsecase interface {
