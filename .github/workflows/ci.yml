@@ -2,40 +2,53 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build-test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        go: [1.24]
         service: [user-service, ai-service]
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4            # v4 muhim!
+        with:
+          fetch-depth: 0                     # to‘liq git history (Go modullar uchun zarur emas, lekin baribir yaxshi)
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
+          go-version: 1.24
+          cache: true                        # avtomatik cache qiladi (juda qulay!)
 
-      - name: Install dependencies
+      - name: Build & Test ${{ matrix.service }}
         run: |
           cd ${{ matrix.service }}
+          
+          # Bu yerda go.mod mavjudligini tekshiramiz
+          if [ ! -f go.mod ]; then
+            echo "go.mod topilmadi: ${{ matrix.service }}"
+            exit 1
+          fi
+          
+          echo "=== ${{ matrix.service }} uchun go.mod ==="
+          cat go.mod
+          
           go mod tidy
           go mod download
+          go mod verify
+          
+          echo "=== Build ==="
+          go build -v -o bin/${{ matrix.service }} ./cmd/main.go
+          
+          echo "=== Test ==="
+          go test -v ./...
 
-      - name: Build ${{ matrix.service }}
-        run: |
-          cd ${{ matrix.service }}
-          go build -o bin/${{ matrix.service }} ./cmd/main.go
-
-      - name: Test ${{ matrix.service }}
-        run: |
-          cd ${{ matrix.service }}
-          go test ./...
+      # Agar test coverage kerak bo‘lsa, qo‘shing
+      # - name: Upload coverage (ixtiyoriy)
+      #   if: matrix.service == 'user-service'
+      #   uses: codecov/codecov-action@v4
