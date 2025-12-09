@@ -2,7 +2,7 @@ package usecase
 
 import (
 	domain "user-service/internal/domen"
-	"user-service/internal/util/cache"
+	"user-service/pkg"
 )
 
 type UserUsecase interface {
@@ -23,7 +23,7 @@ func NewUserUsecase(repo domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) GetUserByTelegramID(telegramID int64) (*domain.User, error) {
 	// Read-Through pattern
-	return cache.ReadThroughUser(telegramID, func() (*domain.User, error) {
+	return pkg.ReadThroughUser(telegramID, func() (*domain.User, error) {
 		// loader → repository chaqiradi
 		return u.repo.GetByTelegramID(telegramID)
 	})
@@ -37,7 +37,7 @@ func (u *userUsecase) CreateUser(input *domain.User) (*domain.User, error) {
 	}
 
 	// 2️⃣ Write-Through pattern
-	return cache.WriteThroughUser(input, func(user *domain.User) (*domain.User, error) {
+	return pkg.WriteThroughUser(input, func(user *domain.User) (*domain.User, error) {
 		// loader → repository Create chaqiriladi
 		return u.repo.Create(user)
 	})
