@@ -24,6 +24,12 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
+      - name: Install dependencies
+        run: |
+          cd ${{ matrix.service }}
+          go mod tidy
+          go mod download
+
       - name: Build ${{ matrix.service }}
         run: |
           cd ${{ matrix.service }}
