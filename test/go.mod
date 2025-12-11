@@ -3,7 +3,7 @@ module test
 go 1.24.0
 
 require (
-	github.com/khbdev/arena-startup-proto v0.0.0-20251208091530-bc32dcc61a00
+	github.com/khbdev/arena-startup-proto v0.0.0-20251210155239-98b3f92df000
 	google.golang.org/grpc v1.77.0
 )
 

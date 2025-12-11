@@ -9,16 +9,26 @@ import (
 	"os"
 )
 
+type Option struct {
+	ID   string `json:"id"`
+	Text string `json:"text"`
+}
+
 type Question struct {
+	ID       string   `json:"id"`
 	Question string   `json:"question"`
-	Options  []string `json:"options"`
+	Options  []Option `json:"options"`
 	Correct  string   `json:"correct"`
 }
 
 func ProcessPrompt(prompt string, count int) ([]Question, error) {
 	fullPrompt := fmt.Sprintf(`
-Generate %d %s question in JSON:
-{"question":"","options":["A","B","C","D"],"correct":""}
+Generate %d questions about "%s" in JSON. 
+Each question must have:
+- "id": unique string
+- "question": text
+- "options": array of objects with "id": "A"-"D" and "text": option text
+- "correct": the id of the correct option
 Return ONLY JSON array.
 `, count, prompt)
 

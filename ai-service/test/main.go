@@ -22,7 +22,7 @@ func PublishTestMessages() {
 	for i := 1; i <= 1; i++ {
 		msg := model.TestRequest{
 			TelegramID: 3555345,
-			Prompt:     fmt.Sprintf("Test prompt %d: Matematika haqida", i),
+			Prompt:     fmt.Sprintf("Test prompt %d: ingiliz tili haqida", i),
 			Count:      1,
 		}
 
