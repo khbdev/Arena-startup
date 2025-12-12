@@ -2,53 +2,34 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        service: [user-service, ai-service]
+        os: [ubuntu-latest]
+        go: [1.24]
+        service: [user-service, ai-service, test-section-service]
 
     steps:
-      - name: Checkout repository (full history)
-        uses: actions/checkout@v4            # v4 muhim!
-        with:
-          fetch-depth: 0                     # to‘liq git history (Go modullar uchun zarur emas, lekin baribir yaxshi)
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.24
-          cache: true                        # avtomatik cache qiladi (juda qulay!)
+          go-version: ${{ matrix.go }}
 
-      - name: Build & Test ${{ matrix.service }}
+      - name: Build ${{ matrix.service }}
         run: |
           cd ${{ matrix.service }}
-          
-          # Bu yerda go.mod mavjudligini tekshiramiz
-          if [ ! -f go.mod ]; then
-            echo "go.mod topilmadi: ${{ matrix.service }}"
-            exit 1
-          fi
-          
-          echo "=== ${{ matrix.service }} uchun go.mod ==="
-          cat go.mod
-          
-          go mod tidy
-          go mod download
-          go mod verify
-          
-          echo "=== Build ==="
-          go build -v -o bin/${{ matrix.service }} ./cmd/main.go
-          
-          echo "=== Test ==="
-          go test -v ./...
+          go build -o bin/${{ matrix.service }} ./cmd/main.go
 
-      # Agar test coverage kerak bo‘lsa, qo‘shing
-      # - name: Upload coverage (ixtiyoriy)
-      #   if: matrix.service == 'user-service'
-      #   uses: codecov/codecov-action@v4
+      - name: Test ${{ matrix.service }}
+        run: |
+          cd ${{ matrix.service }}
+          go test ./...
